@@ -65,9 +65,28 @@ if (topbar) {
     return;
   }
 
-  document.title = project.title;
-  document.getElementById('page-title').textContent = project.title;
+  const pageTitle = `${project.title} | Atef Portfolio`;
+  document.title = pageTitle;
+  document.getElementById('page-title').textContent = pageTitle;
   document.getElementById('project-title').textContent = project.title;
+
+  const ogTitle = document.getElementById('og-title');
+  if (ogTitle) ogTitle.content = pageTitle;
+  const twTitle = document.getElementById('tw-title');
+  if (twTitle) twTitle.content = pageTitle;
+
+  const descSnippet = Array.isArray(project.description) ? project.description[0] : project.description;
+  if (descSnippet) {
+    const metaDesc = document.getElementById('meta-desc');
+    if (metaDesc) metaDesc.content = descSnippet;
+    const ogDesc = document.getElementById('og-desc');
+    if (ogDesc) ogDesc.content = descSnippet;
+    const twDesc = document.getElementById('tw-desc');
+    if (twDesc) twDesc.content = descSnippet;
+  }
+
+  const ogUrl = document.getElementById('og-url');
+  if (ogUrl) ogUrl.content = window.location.href;
   function renderParagraphs(container, content) {
     if (!content) return;
     const paragraphs = Array.isArray(content) ? content : [content];
