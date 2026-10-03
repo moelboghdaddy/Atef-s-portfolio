@@ -5,7 +5,7 @@ import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS_DIR = os.path.join(ROOT, 'assets')
-THUMBS_DIR = os.path.join(ASSETS_DIR, '_thumbs')
+THUMBS_DIR = os.path.join(ASSETS_DIR, 'thumbs')
 
 def get_dimensions(path):
     try:
@@ -25,7 +25,7 @@ def run():
     
     # 1. Clean zero-byte files
     for root, dirs, files in os.walk(ASSETS_DIR):
-        if '_thumbs' in root:
+        if 'thumbs' in root:
             continue
         for f in files:
             fp = os.path.join(root, f)
@@ -36,7 +36,7 @@ def run():
     # 2. Optimize images and generate thumbnails
     for entry in sorted(os.listdir(ASSETS_DIR)):
         proj_dir = os.path.join(ASSETS_DIR, entry)
-        if not os.path.isdir(proj_dir) or entry.startswith(('_', '.')) or entry.lower() in ('logo', '_thumbs'):
+        if not os.path.isdir(proj_dir) or entry.startswith(('_', '.')) or entry.lower() in ('logo', 'thumbs'):
             continue
 
         proj_thumb_dir = os.path.join(THUMBS_DIR, entry)

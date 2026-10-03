@@ -69,7 +69,7 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   // Pixels per second the belt moves. Kept constant across projects so
   // longer galleries just take proportionally longer to loop.
-  const MARQUEE_SPEED = 55;
+  const MARQUEE_SPEED = 65;
 
   data.projects.forEach((project) => {
     const strip = document.createElement('article');
@@ -90,7 +90,7 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     // Render the gallery twice back to back so the loop from 0% to -50%
     // is seamless, like a belt of images passing by.
-    const MAX_MARQUEE_IMAGES = 10;
+    const MAX_MARQUEE_IMAGES = 14;
     const images = project.gallery.length
       ? project.gallery.slice(0, MAX_MARQUEE_IMAGES)
       : [project.cover].filter(Boolean);
@@ -154,15 +154,19 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
     requestAnimationFrame(setDuration);
   });
 
-  // Fade + blur each project strip in as a whole, once, when it scrolls
-  // into view — the belt only starts moving once it's visible.
+  // Fade + blur each project strip in smoothly as it approaches the viewport
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        entry.target.classList.toggle('in-view', entry.isIntersecting);
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          entry.target.classList.add('is-animating');
+        } else {
+          entry.target.classList.remove('is-animating');
+        }
       });
     },
-    { threshold: 0.15 }
+    { rootMargin: '80px 0px', threshold: 0.05 }
   );
 
   document.querySelectorAll('.project-strip').forEach((el) => observer.observe(el));

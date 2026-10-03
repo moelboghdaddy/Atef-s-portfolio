@@ -122,7 +122,7 @@ function buildProjects() {
 
   const entries = fs
     .readdirSync(ASSETS_DIR, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && !e.name.startsWith('_') && !e.name.startsWith('.') && e.name.toLowerCase() !== 'logo');
+    .filter((e) => e.isDirectory() && !e.name.startsWith('_') && !e.name.startsWith('.') && e.name.toLowerCase() !== 'logo' && e.name.toLowerCase() !== 'thumbs');
 
   const projects = entries.map((entry, index) => {
     const dir = path.join(ASSETS_DIR, entry.name);
@@ -146,7 +146,7 @@ function buildProjects() {
     const withPath = (f) => (f ? `assets/${entry.name}/${f}` : null);
     const withThumb = (f) => {
       if (!f) return null;
-      const thumbRelative = `assets/_thumbs/${entry.name}/${f}`;
+      const thumbRelative = `assets/thumbs/${entry.name}/${f}`;
       const thumbFull = path.join(ROOT, thumbRelative);
       if (fs.existsSync(thumbFull)) {
         return thumbRelative;

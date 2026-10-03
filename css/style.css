@@ -398,12 +398,15 @@ hyphens: auto;
   border-top: 1px solid var(--line);
   padding: 28px 0 40px;
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+  filter: blur(12px);
+  transform: translateY(24px);
+  transition: opacity 0.8s var(--ease), filter 0.8s var(--ease), transform 0.8s var(--ease);
+  will-change: opacity, transform, filter;
 }
 
 .project-strip.in-view {
   opacity: 1;
+  filter: blur(0);
   transform: translateY(0);
 }
 
@@ -466,7 +469,8 @@ hyphens: auto;
   will-change: transform;
 }
 
-.project-strip.in-view .project-strip__marquee {
+.project-strip.in-view .project-strip__marquee,
+.project-strip.is-animating .project-strip__marquee {
   animation-play-state: running;
 }
 
@@ -652,9 +656,10 @@ hyphens: auto;
 .row video {
   width: 100%;
   display: block;
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+  transition: opacity 0.7s var(--ease), filter 0.7s var(--ease), transform 0.6s var(--ease);
   opacity: 0;
-  transform: translateY(16px);
+  filter: blur(14px);
+  transform: translateY(24px) scale(1.01);
 }
 
 .row--pair img,
@@ -667,7 +672,8 @@ hyphens: auto;
 .row img.visible,
 .row video.visible {
   opacity: 1;
-  transform: translateY(0);
+  filter: blur(0);
+  transform: translateY(0) scale(1);
 }
 
 .row .frame__img-wrap:hover img.visible,
@@ -720,7 +726,7 @@ hyphens: auto;
 @media (prefers-reduced-motion: reduce) {
   .loading-logo { animation: none !important; opacity: 0.9 !important; }
   .project-strip__marquee { animation: none !important; }
-  hero h1, hero p { animation: none !important; opacity: 1 !important; filter: none !important; transform: none !important; }
+  .hero h1, .hero p { animation: none !important; opacity: 1 !important; filter: none !important; transform: none !important; }
   .frame, .frame img, .row--large img, .row--pair img, .project-strip {
     transition: opacity 0.3s ease !important;
     filter: none !important;
