@@ -71,14 +71,18 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
   // longer galleries just take proportionally longer to loop.
   const MARQUEE_SPEED = 65;
 
-  data.projects.forEach((project) => {
+  data.projects.forEach((project, index) => {
     const strip = document.createElement('article');
     strip.className = 'project-strip';
 
+    const num = String(index + 1).padStart(2, '0');
     const head = document.createElement('div');
     head.className = 'project-strip__head';
     head.innerHTML = `
-      <h3>${escapeHTML(project.title)}</h3>
+      <div class="project-strip__title-wrap">
+        <span class="project-strip__num">${num}</span>
+        <h3>${escapeHTML(project.title)}</h3>
+      </div>
       <span class="project-strip__hint"><span class="dot"></span>Auto-playing — hover to pause</span>
     `;
 
@@ -126,7 +130,10 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
       const title = document.createElement('span');
       title.className = 'frame__title';
-      title.textContent = project.title;
+      title.innerHTML = `
+        <span class="frame__title-text">${escapeHTML(project.title)}</span>
+        <span class="frame__title-arrow">&rarr;</span>
+      `;
 
       a.appendChild(wrap);
       a.appendChild(title);
