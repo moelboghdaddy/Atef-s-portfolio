@@ -36,12 +36,22 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
     if (loadingLogo) loadingLogo.style.display = 'none';
   }
 
-  // Hide the blurred loading screen once the page has settled in.
+  // Hide the loading screen promptly once initial page is interactive
   const loadingScreen = document.getElementById('loading-screen');
   if (loadingScreen) {
-    const hideLoadingScreen = () => loadingScreen.classList.add('hidden');
-    window.addEventListener('load', () => requestAnimationFrame(hideLoadingScreen));
-    setTimeout(hideLoadingScreen, 2500); // safety net
+    const hideLoadingScreen = () => {
+      if (!loadingScreen.classList.contains('hidden')) {
+        loadingScreen.classList.add('hidden');
+        setTimeout(() => { loadingScreen.style.display = 'none'; }, 500);
+      }
+    };
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      requestAnimationFrame(hideLoadingScreen);
+    } else {
+      document.addEventListener('DOMContentLoaded', hideLoadingScreen);
+    }
+    window.addEventListener('load', hideLoadingScreen);
+    setTimeout(hideLoadingScreen, 1200); // safety net
   }
 
   const workList = document.getElementById('work-list');
@@ -80,35 +90,40 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     // Render the gallery twice back to back so the loop from 0% to -50%
     // is seamless, like a belt of images passing by.
-    const MAX_MARQUEE_IMAGES = 14;
+    const MAX_MARQUEE_IMAGES = 10;
     const images = project.gallery.length
-  ? project.gallery.slice(0, MAX_MARQUEE_IMAGES)
-  : [project.cover].filter(Boolean);
-  const buildFrame = (item, hidden) => {
-    const a = document.createElement('a');
-    a.className = 'frame';
-    a.href = `project.html?p=${encodeURIComponent(project.slug)}`;
-    if (hidden) a.setAttribute('aria-hidden', 'true');
-  
-    const wrap = document.createElement('div');
-    wrap.className = 'frame__img-wrap';
-  
-    let media;
-    if (item.video) {
-      media = document.createElement('video');
-      media.src = item.src;
-      media.autoplay = true;
-      media.muted = true;
-      media.loop = true;
-      media.playsInline = true;
-    } else {
-      media = document.createElement('img');
-      media.src = item.src;
-      media.loading = 'lazy';
-      media.decoding = 'async';
-      media.alt = project.title;
-    }
-    wrap.appendChild(media);
+      ? project.gallery.slice(0, MAX_MARQUEE_IMAGES)
+      : [project.cover].filter(Boolean);
+
+    const buildFrame = (item, hidden) => {
+      const a = document.createElement('a');
+      a.className = 'frame';
+      a.href = `project.html?p=${encodeURIComponent(project.slug)}`;
+      if (hidden) a.setAttribute('aria-hidden', 'true');
+
+      const wrap = document.createElement('div');
+      wrap.className = 'frame__img-wrap';
+
+      let media;
+      if (item.video) {
+        media = document.createElement('video');
+        media.src = item.src;
+        media.autoplay = true;
+        media.muted = true;
+        media.loop = true;
+        media.playsInline = true;
+      } else {
+        media = document.createElement('img');
+        // Use optimized thumbnail for ultra-fast, smooth marquee performance
+        media.src = item.thumb || item.src;
+        media.loading = 'lazy';
+        media.decoding = 'async';
+        media.alt = project.title;
+        media.width = 380;
+        media.height = 260;
+      }
+      wrap.appendChild(media);
+
       const title = document.createElement('span');
       title.className = 'frame__title';
       title.textContent = project.title;
@@ -119,7 +134,7 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
     };
 
     images.forEach((src) => marquee.appendChild(buildFrame(src, false)));
-images.forEach((src) => marquee.appendChild(buildFrame(src, true)));
+    images.forEach((src) => marquee.appendChild(buildFrame(src, true)));
 
     track.appendChild(marquee);
     strip.appendChild(head);
@@ -128,12 +143,15 @@ images.forEach((src) => marquee.appendChild(buildFrame(src, true)));
 
     // Duration is based on the width of a single (non-doubled) set, so
     // every project's belt moves at the same visual speed.
-    requestAnimationFrame(() => {
+    const setDuration = () => {
       const fullWidth = marquee.scrollWidth;
       const oneSetWidth = fullWidth / 2;
-      const duration = Math.max(oneSetWidth / MARQUEE_SPEED, 8);
-      marquee.style.animationDuration = `${duration}s`;
-    });
+      if (oneSetWidth > 0) {
+        const duration = Math.max(oneSetWidth / MARQUEE_SPEED, 8);
+        marquee.style.animationDuration = `${duration}s`;
+      }
+    };
+    requestAnimationFrame(setDuration);
   });
 
   // Fade + blur each project strip in as a whole, once, when it scrolls

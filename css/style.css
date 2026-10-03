@@ -397,18 +397,13 @@ hyphens: auto;
 .project-strip {
   border-top: 1px solid var(--line);
   padding: 28px 0 40px;
-  content-visibility: auto;
-  contain-intrinsic-size: 0 520px;
-
   opacity: 0;
-  filter: blur(16px);
-  transform: translateY(24px);
-  transition: opacity 0.8s var(--ease), filter 0.8s var(--ease), transform 0.8s var(--ease);
+  transform: translateY(16px);
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
 }
 
 .project-strip.in-view {
   opacity: 1;
-  filter: blur(0);
   transform: translateY(0);
 }
 
@@ -487,6 +482,7 @@ hyphens: auto;
 .frame {
   flex: 0 0 auto;
   width: min(60vw, 380px);
+  aspect-ratio: 380 / 260;
   border-radius: 3px;
   overflow: hidden;
   background: var(--paper);
@@ -502,16 +498,22 @@ hyphens: auto;
 
 .frame:active { transform: translateY(-1px) scale(0.99); }
 
-.frame__img-wrap { overflow: hidden; }
-
-.frame img {
+.frame__img-wrap {
   width: 100%;
-  height: 260px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.frame img,
+.frame video {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   transition: transform 0.6s var(--ease);
 }
 
-.frame:hover img { transform: scale(1.08); }
+.frame:hover img,
+.frame:hover video { transform: scale(1.08); }
 
 .frame__title {
   position: absolute;
@@ -529,7 +531,6 @@ hyphens: auto;
 
 @media (max-width: 640px) {
   .frame { width: 72vw; }
-  .frame img { height: 200px; }
 }
 
 /* ---------- About / Contact ---------- */
@@ -651,10 +652,9 @@ hyphens: auto;
 .row video {
   width: 100%;
   display: block;
-  transition: opacity 0.7s var(--ease), filter 0.7s var(--ease), transform 0.5s var(--ease);
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
   opacity: 0;
-  filter: blur(20px);
-  transform: translateY(24px) scale(1.02);
+  transform: translateY(16px);
 }
 
 .row--pair img,
@@ -667,8 +667,7 @@ hyphens: auto;
 .row img.visible,
 .row video.visible {
   opacity: 1;
-  filter: blur(0);
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
 }
 
 .row .frame__img-wrap:hover img.visible,

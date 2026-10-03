@@ -109,13 +109,27 @@ function buildProjects() {
     return [];
   }
 
+  const scriptPath = path.join(ROOT, 'scripts', 'optimize_images.py');
+  if (process.argv.includes('--optimize') && fs.existsSync(scriptPath)) {
+    try {
+      const { execSync } = require('child_process');
+      console.log('Optimizing images and generating thumbnails...');
+      execSync(`python3 "${scriptPath}"`, { stdio: 'inherit' });
+    } catch (e) {
+      console.warn(`  ! Image optimization failed: ${e.message}`);
+    }
+  }
+
   const entries = fs
     .readdirSync(ASSETS_DIR, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && e.name.toLowerCase() !== 'logo');
+    .filter((e) => e.isDirectory() && !e.name.startsWith('_') && !e.name.startsWith('.') && e.name.toLowerCase() !== 'logo');
 
   const projects = entries.map((entry, index) => {
     const dir = path.join(ASSETS_DIR, entry.name);
-    const files = fs.readdirSync(dir).filter((f) => MEDIA_EXT.test(f));
+    const files = fs.readdirSync(dir).filter((f) => {
+      const fullPath = path.join(dir, f);
+      return MEDIA_EXT.test(f) && fs.statSync(fullPath).size > 0;
+    });
     const rows = parseRows(files);
     const info = readInfo(dir);
     const unmatched = files.filter((f) => {
@@ -130,8 +144,17 @@ function buildProjects() {
     }
 
     const withPath = (f) => (f ? `assets/${entry.name}/${f}` : null);
+    const withThumb = (f) => {
+      if (!f) return null;
+      const thumbRelative = `assets/_thumbs/${entry.name}/${f}`;
+      const thumbFull = path.join(ROOT, thumbRelative);
+      if (fs.existsSync(thumbFull)) {
+        return thumbRelative;
+      }
+      return withPath(f);
+    };
     const isVideo = (f) => (f ? VIDEO_EXT.test(f) : false);
-    const toMedia = (f) => (f ? { src: withPath(f), video: isVideo(f) } : null);
+    const toMedia = (f) => (f ? { src: withPath(f), thumb: withThumb(f), video: isVideo(f) } : null);
 
     const coverRow = rows[0];
     const cover = coverRow
@@ -152,12 +175,14 @@ function buildProjects() {
       gallery,
       rows: rows.map((r) =>
         r.type === 'large'
-          ? { type: 'large', src: withPath(r.src), video: isVideo(r.src) }
+          ? { type: 'large', src: withPath(r.src), thumb: withThumb(r.src), video: isVideo(r.src) }
           : {
               type: 'pair',
               left: withPath(r.left),
+              leftThumb: withThumb(r.left),
               leftVideo: isVideo(r.left),
               right: withPath(r.right),
+              rightThumb: withThumb(r.right),
               rightVideo: isVideo(r.right),
             }
       ),
