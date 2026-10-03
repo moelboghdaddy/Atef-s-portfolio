@@ -106,24 +106,29 @@ if (topbar) {
     directionWrap.style.display = 'none';
   }
 
-  function mediaTag(src, isVideo) {
+  function mediaTag(src, isVideo, thumb, isPriority) {
     if (!src) return '';
     if (isVideo) {
       return `<div class="frame__img-wrap"><video src="${src}" autoplay muted loop playsinline></video></div>`;
     }
-    return `<div class="frame__img-wrap"><img src="${src}" loading="lazy" decoding="async" alt="${escapeHTML(project.title)}"></div>`;
+    const initialSrc = thumb || src;
+    const srcset = thumb && thumb !== src ? `srcset="${thumb} 760w, ${src} 1800w" sizes="(max-width: 768px) 100vw, 1200px"` : '';
+    const loadingAttr = isPriority ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+    return `<div class="frame__img-wrap"><img src="${initialSrc}" ${srcset} ${loadingAttr} decoding="async" alt="${escapeHTML(project.title)}"></div>`;
   }
   
-  project.rows.forEach((row) => {
+  project.rows.forEach((row, rIdx) => {
+    const isPriority = rIdx === 0;
     if (row.type === 'large') {
       const div = document.createElement('div');
       div.className = 'row row--large';
-      div.innerHTML = mediaTag(row.src, row.video);
+      div.innerHTML = mediaTag(row.src, row.video, row.thumb, isPriority);
       rowsEl.appendChild(div);
     } else {
       const div = document.createElement('div');
       div.className = 'row row--pair';
-      div.innerHTML = mediaTag(row.left, row.leftVideo) + mediaTag(row.right, row.rightVideo);
+      div.innerHTML = mediaTag(row.left, row.leftVideo, row.leftThumb, isPriority) + 
+                      mediaTag(row.right, row.rightVideo, row.rightThumb, isPriority);
       rowsEl.appendChild(div);
     }
   });
@@ -152,10 +157,25 @@ if (topbar) {
         }
       });
     },
-    { threshold: 0.15 }
+    { rootMargin: '350px 0px', threshold: 0.02 }
   );
 
-  document.querySelectorAll('.row img, .row video').forEach((el) => observer.observe(el));
+  document.querySelectorAll('.row img, .row video').forEach((media) => {
+    const wrap = media.closest('.frame__img-wrap');
+    const onLoaded = () => {
+      media.classList.add('is-loaded');
+      if (wrap) wrap.classList.add('is-loaded');
+    };
+    if (media.tagName === 'VIDEO') {
+      media.addEventListener('loadeddata', onLoaded, { once: true });
+    } else if (media.complete && media.naturalWidth > 0) {
+      requestAnimationFrame(onLoaded);
+    } else {
+      media.addEventListener('load', onLoaded, { once: true });
+      media.addEventListener('error', onLoaded, { once: true });
+    }
+    observer.observe(media);
+  });
 
   function escapeHTML(str) {
     const div = document.createElement('div');

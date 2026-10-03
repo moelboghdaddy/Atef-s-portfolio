@@ -253,6 +253,8 @@ img, video {
   gap: 12px;
   margin-bottom: 16px;
   opacity: 0;
+  filter: blur(14px);
+  transform: translateY(16px);
   animation: heroIn 0.8s var(--ease) 0.15s forwards;
 }
 
@@ -440,27 +442,27 @@ img, video {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: clamp(36px, 8vw, 110px);
+  width: clamp(50px, 14vw, 180px);
   z-index: 3;
   pointer-events: none;
 }
 
 .project-strip__track::before {
   left: 0;
-  background: linear-gradient(to right, #FFFFFF 20%, rgba(255, 255, 255, 0.75) 60%, transparent 100%);
+  background: linear-gradient(to right, #FFFFFF 25%, rgba(255, 255, 255, 0.75) 65%, transparent 100%);
   mask-image: linear-gradient(to right, black, transparent);
   -webkit-mask-image: linear-gradient(to right, black, transparent);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .project-strip__track::after {
   right: 0;
-  background: linear-gradient(to left, #FFFFFF 20%, rgba(255, 255, 255, 0.75) 60%, transparent 100%);
+  background: linear-gradient(to left, #FFFFFF 25%, rgba(255, 255, 255, 0.75) 65%, transparent 100%);
   mask-image: linear-gradient(to left, black, transparent);
   -webkit-mask-image: linear-gradient(to left, black, transparent);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .project-strip__marquee {
@@ -511,22 +513,66 @@ img, video {
 }
 
 .frame__img-wrap {
+  position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #F0F0F2;
+  background: #EDEDF0;
+}
+
+/* Elegant shimmer placeholder while image loads */
+.frame__img-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(235, 235, 238, 0.7) 0%,
+    rgba(250, 250, 252, 0.95) 50%,
+    rgba(235, 235, 238, 0.7) 100%
+  );
+  background-size: 200% 100%;
+  animation: imgShimmer 1.6s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease);
+}
+
+.frame__img-wrap.is-loaded::before {
+  opacity: 0;
+  animation: none;
+}
+
+@keyframes imgShimmer {
+  0% { background-position: 150% 0; }
+  100% { background-position: -50% 0; }
 }
 
 .frame img,
 .frame video {
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.7s var(--ease), filter 0.5s var(--ease);
+  opacity: 0;
+  filter: blur(22px);
+  transform: scale(1.05);
+  transition: opacity 0.65s var(--ease),
+              filter 0.75s var(--ease),
+              transform 0.75s var(--ease);
+  will-change: opacity, filter, transform;
 }
 
-.frame:hover img,
-.frame:hover video {
+.frame img.is-loaded,
+.frame video.is-loaded {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+}
+
+.frame:hover img.is-loaded,
+.frame:hover video.is-loaded {
   transform: scale(1.08);
 }
 
@@ -929,10 +975,34 @@ img, video {
 }
 
 .row .frame__img-wrap {
+  position: relative;
   overflow: hidden;
   border-radius: 14px;
   border: 1px solid var(--line);
   box-shadow: 0 8px 24px -6px rgba(15, 16, 20, 0.06);
+  background: #EDEDF0;
+}
+
+.row .frame__img-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(235, 235, 238, 0.7) 0%,
+    rgba(250, 250, 252, 0.95) 50%,
+    rgba(235, 235, 238, 0.7) 100%
+  );
+  background-size: 200% 100%;
+  animation: imgShimmer 1.6s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease);
+}
+
+.row .frame__img-wrap.is-loaded::before {
+  opacity: 0;
+  animation: none;
 }
 
 .row--pair .frame__img-wrap {
@@ -941,12 +1011,15 @@ img, video {
 
 .row img,
 .row video {
+  position: relative;
+  z-index: 2;
   width: 100%;
   display: block;
-  transition: opacity 0.7s var(--ease), filter 0.7s var(--ease), transform 0.6s var(--ease);
+  transition: opacity 0.75s var(--ease), filter 0.8s var(--ease), transform 0.75s var(--ease);
   opacity: 0;
-  filter: blur(14px);
-  transform: translateY(24px) scale(1.01);
+  filter: blur(22px);
+  transform: translateY(22px) scale(1.02);
+  will-change: opacity, filter, transform;
 }
 
 .row--pair img,

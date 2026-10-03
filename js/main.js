@@ -94,12 +94,12 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     // Render the gallery twice back to back so the loop from 0% to -50%
     // is seamless, like a belt of images passing by.
-    const MAX_MARQUEE_IMAGES = 14;
+    const MAX_MARQUEE_IMAGES = 8;
     const images = project.gallery.length
       ? project.gallery.slice(0, MAX_MARQUEE_IMAGES)
       : [project.cover].filter(Boolean);
 
-    const buildFrame = (item, hidden) => {
+    const buildFrame = (item, hidden, cardIndex, stripIndex) => {
       const a = document.createElement('a');
       a.className = 'frame';
       a.href = `project.html?p=${encodeURIComponent(project.slug)}`;
@@ -116,15 +116,40 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
         media.muted = true;
         media.loop = true;
         media.playsInline = true;
+        media.addEventListener('loadeddata', () => {
+          media.classList.add('is-loaded');
+          wrap.classList.add('is-loaded');
+        }, { once: true });
       } else {
         media = document.createElement('img');
         // Use optimized thumbnail for ultra-fast, smooth marquee performance
         media.src = item.thumb || item.src;
-        media.loading = 'lazy';
+        // Prioritize immediately visible cards so there is never a blank grey card
+        const isImmediatelyVisible = !hidden && cardIndex < 4;
+        if (isImmediatelyVisible) {
+          media.loading = 'eager';
+          if (stripIndex <= 1) {
+            media.fetchPriority = 'high';
+          }
+        } else {
+          media.loading = 'lazy';
+        }
         media.decoding = 'async';
         media.alt = project.title;
         media.width = 380;
         media.height = 260;
+
+        const onLoaded = () => {
+          media.classList.add('is-loaded');
+          wrap.classList.add('is-loaded');
+        };
+
+        if (media.complete && media.naturalWidth > 0) {
+          requestAnimationFrame(onLoaded);
+        } else {
+          media.addEventListener('load', onLoaded, { once: true });
+          media.addEventListener('error', onLoaded, { once: true });
+        }
       }
       wrap.appendChild(media);
 
@@ -140,8 +165,8 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
       return a;
     };
 
-    images.forEach((src) => marquee.appendChild(buildFrame(src, false)));
-    images.forEach((src) => marquee.appendChild(buildFrame(src, true)));
+    images.forEach((src, idx) => marquee.appendChild(buildFrame(src, false, idx, index)));
+    images.forEach((src, idx) => marquee.appendChild(buildFrame(src, true, idx, index)));
 
     track.appendChild(marquee);
     strip.appendChild(head);
@@ -162,18 +187,24 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
   });
 
   // Fade + blur each project strip in smoothly as it approaches the viewport
+  // and trigger eager preloading of all images 500px in advance.
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('in-view');
           entry.target.classList.add('is-animating');
+          // Preload remaining lazy images in this strip immediately
+          const lazyImgs = entry.target.querySelectorAll('img[loading="lazy"]');
+          lazyImgs.forEach((img) => {
+            img.loading = 'eager';
+          });
         } else {
           entry.target.classList.remove('is-animating');
         }
       });
     },
-    { rootMargin: '80px 0px', threshold: 0.05 }
+    { rootMargin: '500px 0px', threshold: 0.02 }
   );
 
   document.querySelectorAll('.project-strip').forEach((el) => observer.observe(el));
