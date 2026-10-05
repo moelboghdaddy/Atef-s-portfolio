@@ -2,20 +2,7 @@
   const data = window.SITE_DATA || { logo: null, projects: [] };
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('p');
-// Hide the navbar on scroll down, reveal it on scroll up.
-const topbar = document.querySelector('.topbar');
-if (topbar) {
-  let lastY = window.scrollY;
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY;
-    if (y > lastY && y > topbar.offsetHeight) {
-      topbar.classList.add('nav-hidden');
-    } else {
-      topbar.classList.remove('nav-hidden');
-    }
-    lastY = y;
-  }, { passive: true });
-}
+
   // Logo (top bar + favicon + loading screen)
   if (data.logo) {
     const fallback = document.getElementById('logo-fallback');
@@ -111,10 +98,9 @@ if (topbar) {
     if (isVideo) {
       return `<div class="frame__img-wrap"><video src="${src}" autoplay muted loop playsinline></video></div>`;
     }
-    const initialSrc = thumb || src;
-    const srcset = thumb && thumb !== src ? `srcset="${thumb} 760w, ${src} 1800w" sizes="(max-width: 768px) 100vw, 1200px"` : '';
+    const fullSrc = src || thumb;
     const loadingAttr = isPriority ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
-    return `<div class="frame__img-wrap"><img src="${initialSrc}" ${srcset} ${loadingAttr} decoding="async" alt="${escapeHTML(project.title)}"></div>`;
+    return `<div class="frame__img-wrap"><img src="${fullSrc}" ${loadingAttr} decoding="async" alt="${escapeHTML(project.title)}"></div>`;
   }
   
   project.rows.forEach((row, rIdx) => {

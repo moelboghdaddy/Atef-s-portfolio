@@ -1,21 +1,7 @@
 (function () {
   const data = window.SITE_DATA || { logo: null, projects: [] };
-// Hide the navbar on scroll down, reveal it on scroll up.
-const topbar = document.querySelector('.topbar');
-if (topbar) {
-  let lastY = window.scrollY;
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY;
-    if (y > lastY && y > topbar.offsetHeight) {
-      topbar.classList.add('nav-hidden');
-    } else {
-      topbar.classList.remove('nav-hidden');
-    }
-    lastY = y;
-  }, { passive: true });
-}
-const yearEl = document.getElementById('year');
-if (yearEl) yearEl.textContent = new Date().getFullYear();
+  const yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   // Logo (top bar + favicon + loading screen)
   if (data.logo) {
@@ -83,7 +69,6 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
         <span class="project-strip__num">${num}</span>
         <h3>${escapeHTML(project.title)}</h3>
       </div>
-      <span class="project-strip__hint"><span class="dot"></span>Auto-playing — hover to pause</span>
     `;
 
     const track = document.createElement('div');
@@ -122,8 +107,14 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
         }, { once: true });
       } else {
         media = document.createElement('img');
-        // Use optimized thumbnail for ultra-fast, smooth marquee performance
-        media.src = item.thumb || item.src;
+        // High quality with responsive srcset for sharp display on Retina/high-res screens
+        const fullSrc = item.src || item.thumb;
+        const thumbSrc = item.thumb || item.src;
+        media.src = fullSrc;
+        if (thumbSrc && fullSrc && thumbSrc !== fullSrc) {
+          media.srcset = `${thumbSrc} 760w, ${fullSrc} 1600w`;
+          media.sizes = '(max-width: 680px) 74vw, 390px';
+        }
         // Prioritize immediately visible cards so there is never a blank grey card
         const isImmediatelyVisible = !hidden && cardIndex < 4;
         if (isImmediatelyVisible) {
