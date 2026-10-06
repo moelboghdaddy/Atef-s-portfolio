@@ -12,7 +12,7 @@
     img.onload = () => fallback.replaceWith(img);
 
     const favicon = document.getElementById('favicon');
-    if (favicon) favicon.href = data.logo;
+    if (favicon) favicon.href = 'assets/favicon.png';
 
     const loadingLogo = document.getElementById('loading-logo');
     if (loadingLogo) loadingLogo.src = data.logo;
