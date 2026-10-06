@@ -62,13 +62,34 @@
     strip.className = 'project-strip';
 
     const num = String(index + 1).padStart(2, '0');
+    const projectUrl = `project.html?p=${encodeURIComponent(project.slug || '')}`;
+
+    let shortDesc = '';
+    if (project.description) {
+      const fullDesc = Array.isArray(project.description) ? project.description[0] : project.description;
+      if (fullDesc) {
+        const sentenceMatch = fullDesc.match(/^([^.?!]+[.?!])/);
+        const sentence = sentenceMatch ? sentenceMatch[1] : fullDesc;
+        shortDesc = sentence.length > 120 ? sentence.slice(0, 117).trim() + '…' : sentence;
+      }
+    }
+
     const head = document.createElement('div');
     head.className = 'project-strip__head';
     head.innerHTML = `
-      <div class="project-strip__title-wrap">
-        <span class="project-strip__num">${num}</span>
-        <h3>${escapeHTML(project.title)}</h3>
+      <div class="project-strip__info">
+        <div class="project-strip__title-wrap">
+          <span class="project-strip__num">${num}</span>
+          <a href="${projectUrl}" class="project-strip__title-link">
+            <h3>${escapeHTML(project.title)}</h3>
+          </a>
+        </div>
+        ${shortDesc ? `<p class="project-strip__desc">${escapeHTML(shortDesc)}</p>` : ''}
       </div>
+      <a href="${projectUrl}" class="project-strip__btn">
+        <span>View full project</span>
+        <span class="project-strip__btn-arrow">&rarr;</span>
+      </a>
     `;
 
     const track = document.createElement('div');
@@ -77,17 +98,21 @@
     const marquee = document.createElement('div');
     marquee.className = 'project-strip__marquee';
 
-    // Render the gallery twice back to back so the loop from 0% to -50%
-    // is seamless, like a belt of images passing by.
-    const MAX_MARQUEE_IMAGES = 8;
-    const images = project.gallery.length
-      ? project.gallery.slice(0, MAX_MARQUEE_IMAGES)
+    // Show only the first 3 images of each project, repeated seamlessly
+    const firstThree = project.gallery.length
+      ? project.gallery.slice(0, 3)
       : [project.cover].filter(Boolean);
+
+    const repeatTimes = Math.max(2, Math.ceil(6 / Math.max(1, firstThree.length)));
+    const repeated = [];
+    for (let r = 0; r < repeatTimes; r++) {
+      repeated.push(...firstThree);
+    }
 
     const buildFrame = (item, hidden, cardIndex, stripIndex) => {
       const a = document.createElement('a');
       a.className = 'frame';
-      a.href = `project.html?p=${encodeURIComponent(project.slug)}`;
+      a.href = projectUrl;
       if (hidden) a.setAttribute('aria-hidden', 'true');
 
       const wrap = document.createElement('div');
@@ -156,8 +181,8 @@
       return a;
     };
 
-    images.forEach((src, idx) => marquee.appendChild(buildFrame(src, false, idx, index)));
-    images.forEach((src, idx) => marquee.appendChild(buildFrame(src, true, idx, index)));
+    repeated.forEach((src, idx) => marquee.appendChild(buildFrame(src, false, idx, index)));
+    repeated.forEach((src, idx) => marquee.appendChild(buildFrame(src, true, idx, index)));
 
     track.appendChild(marquee);
     strip.appendChild(head);
