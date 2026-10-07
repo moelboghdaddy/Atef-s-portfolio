@@ -6,8 +6,10 @@
   // Logo (top bar + favicon + loading screen)
   if (data.logo) {
     const fallback = document.getElementById('logo-fallback');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const effectiveLogo = isDark ? 'assets/logo-dark.png' : data.logo;
     const img = new Image();
-    img.src = data.logo;
+    img.src = effectiveLogo;
     img.alt = 'Logo';
     img.onload = () => fallback.replaceWith(img);
 
@@ -15,7 +17,7 @@
     if (favicon) favicon.href = 'assets/favicon.png';
 
     const loadingLogo = document.getElementById('loading-logo');
-    if (loadingLogo) loadingLogo.src = data.logo;
+    if (loadingLogo) loadingLogo.src = effectiveLogo;
   } else {
     const loadingLogo = document.getElementById('loading-logo');
     if (loadingLogo) loadingLogo.style.display = 'none';
@@ -75,6 +77,8 @@
   const ogUrl = document.getElementById('og-url');
   if (ogUrl) ogUrl.content = window.location.href;
   function renderParagraphs(container, content) {
+    if (!container) return;
+    container.innerHTML = '';
     if (!content) return;
     const paragraphs = Array.isArray(content) ? content : [content];
     paragraphs.forEach((text) => {
@@ -83,15 +87,65 @@
       container.appendChild(p);
     });
   }
-  
-  renderParagraphs(document.getElementById('project-description'), project.description);
-  
+
   const directionWrap = document.getElementById('project-direction-wrap');
-  if (project.direction) {
-    renderParagraphs(document.getElementById('project-direction'), project.direction);
-  } else if (directionWrap) {
-    directionWrap.style.display = 'none';
-  }
+  const descContainer = document.getElementById('project-description');
+  const dirContainer = document.getElementById('project-direction');
+  const titleEl = document.getElementById('project-title');
+  const pageTitleEl = document.getElementById('page-title');
+  const backLink = document.getElementById('back-link');
+  const next = data.projects[(index + 1) % data.projects.length];
+
+  // Dynamic project page translations
+  window.updateProjectTranslations = function (lang) {
+    const isAr = lang === 'ar';
+    const translations = window.PROJECT_TRANSLATIONS || {};
+    const pTrans = translations[slug];
+
+    const currentTitle = isAr && pTrans ? pTrans.title : project.title;
+    const siteTitle = isAr ? `${currentTitle} | محفظة أعمال عاطف` : `${project.title} | Atef Portfolio`;
+
+    document.title = siteTitle;
+    if (pageTitleEl) pageTitleEl.textContent = siteTitle;
+    if (titleEl) titleEl.textContent = currentTitle;
+
+    // Render description paragraphs
+    const descContent = isAr && pTrans && pTrans.description ? pTrans.description : project.description;
+    renderParagraphs(descContainer, descContent);
+
+    // Render direction paragraphs
+    const dirContent = isAr && pTrans && pTrans.direction ? pTrans.direction : project.direction;
+    if (dirContent) {
+      if (directionWrap) directionWrap.style.display = '';
+      renderParagraphs(dirContainer, dirContent);
+    } else if (directionWrap) {
+      directionWrap.style.display = 'none';
+    }
+
+    // Update back link
+    if (backLink) {
+      backLink.innerHTML = isAr ? 'العودة إلى الأعمال &larr;' : '&larr; Back to work';
+    }
+
+    // Update project nav link
+    if (navEl) {
+      if (next && next.slug !== project.slug) {
+        const nextTrans = translations[next.slug];
+        const nextTitle = isAr && nextTrans ? nextTrans.title : next.title;
+        navEl.innerHTML = isAr
+          ? `<a href="project.html?p=${encodeURIComponent(next.slug)}">المشروع التالي: ${escapeHTML(nextTitle)} &larr;</a>`
+          : `<a href="project.html?p=${encodeURIComponent(next.slug)}">Next project: ${escapeHTML(next.title)} &rarr;</a>`;
+      } else {
+        navEl.innerHTML = isAr
+          ? `<a href="index.html#work">العودة إلى كافة الأعمال &larr;</a>`
+          : `<a href="index.html#work">&larr; Back to all work</a>`;
+      }
+    }
+  };
+
+  // Initial render of text
+  const initialLang = localStorage.getItem('site_lang') || 'en';
+  window.updateProjectTranslations(initialLang);
 
   function mediaTag(src, isVideo, thumb, isPriority) {
     if (!src) return '';
@@ -102,9 +156,9 @@
     const loadingAttr = isPriority ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
     return `<div class="frame__img-wrap"><img src="${fullSrc}" ${loadingAttr} decoding="async" alt="${escapeHTML(project.title)}"></div>`;
   }
-  
+
   project.rows.forEach((row, rIdx) => {
-    const isPriority = rIdx === 0;
+    const isPriority = rIdx < 2;
     if (row.type === 'large') {
       const div = document.createElement('div');
       div.className = 'row row--large';
@@ -113,7 +167,7 @@
     } else {
       const div = document.createElement('div');
       div.className = 'row row--pair';
-      div.innerHTML = mediaTag(row.left, row.leftVideo, row.leftThumb, isPriority) + 
+      div.innerHTML = mediaTag(row.left, row.leftVideo, row.leftThumb, isPriority) +
                       mediaTag(row.right, row.rightVideo, row.rightThumb, isPriority);
       rowsEl.appendChild(div);
     }
@@ -128,28 +182,33 @@
       rowsEl.appendChild(textBlock);
     }
   }
-  const next = data.projects[(index + 1) % data.projects.length];
-  navEl.innerHTML =
-    next && next.slug !== project.slug
-      ? `<a href="project.html?p=${encodeURIComponent(next.slug)}">Next project: ${escapeHTML(next.title)} &rarr;</a>`
-      : `<a href="index.html#work">&larr; Back to all work</a>`;
 
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
+          const target = entry.target;
+          target.classList.add('visible');
+          if (target.tagName === 'IMG' && target.loading === 'lazy') {
+            target.loading = 'eager';
+          }
+          const nested = target.querySelectorAll ? target.querySelectorAll('img, video') : [];
+          nested.forEach((item) => {
+            item.classList.add('visible');
+            if (item.loading === 'lazy') item.loading = 'eager';
+          });
+          observer.unobserve(target);
         }
       });
     },
-    { rootMargin: '350px 0px', threshold: 0.02 }
+    { rootMargin: '800px 0px', threshold: 0 }
   );
 
+  document.querySelectorAll('.row').forEach((row) => observer.observe(row));
   document.querySelectorAll('.row img, .row video').forEach((media) => {
     const wrap = media.closest('.frame__img-wrap');
     const onLoaded = () => {
-      media.classList.add('is-loaded');
+      media.classList.add('is-loaded', 'visible');
       if (wrap) wrap.classList.add('is-loaded');
     };
     if (media.tagName === 'VIDEO') {

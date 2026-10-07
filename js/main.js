@@ -7,8 +7,10 @@
   if (data.logo) {
     const link = document.getElementById('logo-link');
     const fallback = document.getElementById('logo-fallback');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const effectiveLogo = isDark ? 'assets/logo-dark.png' : data.logo;
     const img = new Image();
-    img.src = data.logo;
+    img.src = effectiveLogo;
     img.alt = 'Logo';
     img.onload = () => fallback.replaceWith(img);
 
@@ -16,7 +18,7 @@
     if (favicon) favicon.href = 'assets/favicon.png';
 
     const loadingLogo = document.getElementById('loading-logo');
-    if (loadingLogo) loadingLogo.src = data.logo;
+    if (loadingLogo) loadingLogo.src = effectiveLogo;
   } else {
     const loadingLogo = document.getElementById('loading-logo');
     if (loadingLogo) loadingLogo.style.display = 'none';
@@ -60,6 +62,7 @@
   data.projects.forEach((project, index) => {
     const strip = document.createElement('article');
     strip.className = 'project-strip';
+    strip.dataset.slug = project.slug;
 
     const num = String(index + 1).padStart(2, '0');
     const projectUrl = `project.html?p=${encodeURIComponent(project.slug || '')}`;
@@ -81,13 +84,13 @@
         <div class="project-strip__title-wrap">
           <span class="project-strip__num">${num}</span>
           <a href="${projectUrl}" class="project-strip__title-link">
-            <h3>${escapeHTML(project.title)}</h3>
+            <h3 class="project-strip__title-text">${escapeHTML(project.title)}</h3>
           </a>
         </div>
         ${shortDesc ? `<p class="project-strip__desc">${escapeHTML(shortDesc)}</p>` : ''}
       </div>
       <a href="${projectUrl}" class="project-strip__btn">
-        <span>View full project</span>
+        <span class="project-strip__btn-text">View full project</span>
         <span class="project-strip__btn-arrow">&rarr;</span>
       </a>
     `;
@@ -99,9 +102,28 @@
     marquee.className = 'project-strip__marquee';
 
     // Show only the first 3 images of each project, repeated seamlessly
-    const firstThree = project.gallery.length
-      ? project.gallery.slice(0, 3)
+    let firstThree = project.gallery.length
+      ? [...project.gallery.slice(0, 3)]
       : [project.cover].filter(Boolean);
+
+    // Specific carousel adjustments requested by user:
+    // 1. Juhayna redesign: replace second image with 9L
+    if (project.slug === 'juhayna-redesign' && firstThree.length >= 2) {
+      firstThree[1] = {
+        src: 'assets/Juhayna redesign/9L.webp',
+        thumb: 'assets/thumbs/Juhayna redesign/9L.webp',
+        video: false
+      };
+    }
+
+    // 2. Era: replace second image with 6s L
+    if (project.slug === 'era' && firstThree.length >= 2) {
+      firstThree[1] = {
+        src: 'assets/Era/6s L.webp',
+        thumb: 'assets/thumbs/Era/6s L.webp',
+        video: false
+      };
+    }
 
     const repeatTimes = Math.max(2, Math.ceil(6 / Math.max(1, firstThree.length)));
     const repeated = [];
@@ -126,12 +148,44 @@
         media.muted = true;
         media.loop = true;
         media.playsInline = true;
+        media.setAttribute('playsinline', '');
+        media.setAttribute('webkit-playsinline', '');
+        media.setAttribute('muted', '');
+
         media.addEventListener('loadeddata', () => {
           media.classList.add('is-loaded');
           wrap.classList.add('is-loaded');
+          media.play().catch(() => {});
         }, { once: true });
+
+        // User request: video on Pepete needs to start playing on phone after first hover / tap
+        a.addEventListener('mouseenter', () => {
+          if (media.paused) media.play().catch(() => {});
+        });
+        a.addEventListener('touchstart', () => {
+          if (media.paused) media.play().catch(() => {});
+        }, { passive: true });
+
+        a.addEventListener('click', (e) => {
+          if (media.paused) {
+            e.preventDefault();
+            e.stopPropagation();
+            media.play().catch(() => {});
+          }
+        });
+        a.addEventListener('touchend', (e) => {
+          if (media.paused) {
+            e.preventDefault();
+            media.play().catch(() => {});
+          }
+        }, { passive: false });
       } else {
         media = document.createElement('img');
+        // Era first image crop requirement: crop from right side so left side copy is fully seen
+        if (project.slug === 'era' && item.src && item.src.includes('Era/1L')) {
+          media.classList.add('frame__img--crop-right');
+        }
+
         // High quality with responsive srcset for sharp display on Retina/high-res screens
         const fullSrc = item.src || item.thumb;
         const thumbSrc = item.thumb || item.src;
@@ -201,6 +255,68 @@
     };
     requestAnimationFrame(setDuration);
   });
+
+  // Dynamic Homepage translations
+  window.updateHomepageTranslations = function (lang) {
+    const isAr = lang === 'ar';
+    const translations = window.PROJECT_TRANSLATIONS || {};
+
+    document.querySelectorAll('.project-strip').forEach((strip) => {
+      const slug = strip.dataset.slug;
+      const projectObj = data.projects.find((p) => p.slug === slug);
+      if (!projectObj) return;
+
+      const pTrans = translations[slug];
+      const currentTitle = isAr && pTrans ? pTrans.title : projectObj.title;
+
+      // 1. Update strip header title
+      const titleEl = strip.querySelector('.project-strip__title-text');
+      if (titleEl) titleEl.textContent = currentTitle;
+
+      // 2. Update strip description
+      const descEl = strip.querySelector('.project-strip__desc');
+      if (descEl) {
+        if (isAr && pTrans && pTrans.shortDesc) {
+          descEl.textContent = pTrans.shortDesc;
+        } else {
+          let enDesc = '';
+          if (projectObj.description) {
+            const fullDesc = Array.isArray(projectObj.description) ? projectObj.description[0] : projectObj.description;
+            if (fullDesc) {
+              const sentenceMatch = fullDesc.match(/^([^.?!]+[.?!])/);
+              const sentence = sentenceMatch ? sentenceMatch[1] : fullDesc;
+              enDesc = sentence.length > 120 ? sentence.slice(0, 117).trim() + '…' : sentence;
+            }
+          }
+          descEl.textContent = enDesc;
+        }
+      }
+
+      // 3. Update view full project button text & arrow
+      const btnText = strip.querySelector('.project-strip__btn-text');
+      if (btnText) {
+        btnText.textContent = isAr ? 'عرض المشروع كاملاً' : 'View full project';
+      }
+      const btnArrow = strip.querySelector('.project-strip__btn-arrow');
+      if (btnArrow) {
+        btnArrow.textContent = isAr ? '←' : '→';
+      }
+
+      // 4. Update frame titles inside marquee
+      strip.querySelectorAll('.frame__title-text').forEach((ft) => {
+        ft.textContent = currentTitle;
+      });
+      strip.querySelectorAll('.frame__title-arrow').forEach((fa) => {
+        fa.textContent = isAr ? '←' : '→';
+      });
+    });
+  };
+
+  // Run initial translations if language is Arabic on load
+  const initialLang = localStorage.getItem('site_lang') || 'en';
+  if (initialLang === 'ar') {
+    window.updateHomepageTranslations('ar');
+  }
 
   // Fade + blur each project strip in smoothly as it approaches the viewport
   // and trigger eager preloading of all images 500px in advance.

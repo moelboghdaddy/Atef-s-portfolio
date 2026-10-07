@@ -1,23 +1,12 @@
 import os
-import subprocess
 import shutil
-import tempfile
+from PIL import Image
+
+Image.MAX_IMAGE_PIXELS = None
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS_DIR = os.path.join(ROOT, 'assets')
 THUMBS_DIR = os.path.join(ASSETS_DIR, 'thumbs')
-
-def get_dimensions(path):
-    try:
-        out = subprocess.check_output(['sips', '-g', 'pixelWidth', '-g', 'pixelHeight', path], text=True)
-        w, h = 0, 0
-        for line in out.splitlines():
-            if 'pixelWidth' in line: w = int(line.split()[-1])
-            if 'pixelHeight' in line: h = int(line.split()[-1])
-        return w, h
-    except Exception as e:
-        print(f"Error getting dimensions for {path}: {e}")
-        return 0, 0
 
 def run():
     print(f"Starting image optimization in {ASSETS_DIR}...")
@@ -47,64 +36,60 @@ def run():
 
         for f in sorted(files):
             src_path = os.path.join(proj_dir, f)
-            thumb_path = os.path.join(proj_thumb_dir, os.path.splitext(f)[0] + '.webp')
+            base_name = os.path.splitext(f)[0]
+            thumb_path = os.path.join(proj_thumb_dir, base_name + '.webp')
             
-            w, h = get_dimensions(src_path)
-            orig_sz = os.path.getsize(src_path)
-            if w == 0 or h == 0:
-                print(f"  Skipping {f}: invalid dimensions")
-                continue
+            try:
+                with Image.open(src_path) as im:
+                    im_rgb = im.convert('RGB')
+                    w, h = im_rgb.size
+                    orig_sz = os.path.getsize(src_path)
 
-            # Full image optimization if > 2000px in either dimension or large file size
-            needs_downscale = max(w, h) > 2000
-            needs_recompress = orig_sz > 500 * 1024
+                    if w == 0 or h == 0:
+                        print(f"  Skipping {f}: invalid dimensions")
+                        continue
 
-            if needs_downscale or needs_recompress:
-                new_w, new_h = w, h
-                if needs_downscale:
-                    if w >= h:
-                        new_w = 2000
-                        new_h = round(h * 2000 / w)
-                    else:
-                        new_h = 2000
-                        new_w = round(w * 2000 / h)
+                    needs_downscale = max(w, h) > 2000
+                    needs_recompress = orig_sz > 500 * 1024 or f.lower().endswith('.png')
 
-                fd, tmp_out = tempfile.mkstemp(suffix='.webp')
-                os.close(fd)
+                    if needs_downscale or needs_recompress:
+                        if needs_downscale:
+                            scale = 2000 / max(w, h)
+                            new_w = round(w * scale)
+                            new_h = round(h * scale)
+                            optimized = im_rgb.resize((new_w, new_h), Image.Resampling.LANCZOS)
+                        else:
+                            new_w, new_h = w, h
+                            optimized = im_rgb
 
-                cmd = ['cwebp', src_path, '-resize', str(new_w), str(new_h), '-q', '82', '-o', tmp_out]
-                subprocess.check_call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        dest_webp = os.path.join(proj_dir, base_name + '.webp')
+                        optimized.save(dest_webp, 'WEBP', quality=85, method=6)
+                        new_sz = os.path.getsize(dest_webp)
+                        print(f"  [FULL RESIZED] {f} -> {os.path.basename(dest_webp)}: {w}x{h} ({orig_sz//1024}KB) -> {new_w}x{new_h} ({new_sz//1024}KB)")
+                        
+                        if dest_webp != src_path and os.path.exists(src_path):
+                            os.remove(src_path)
+                        src_path = dest_webp
+                        w, h = new_w, new_h
+                        im_rgb = optimized
 
-                new_sz = os.path.getsize(tmp_out)
-                if new_sz < orig_sz or needs_downscale:
-                    shutil.move(tmp_out, src_path)
-                    print(f"  [FULL RESIZED] {f}: {w}x{h} ({orig_sz//1024}KB) -> {new_w}x{new_h} ({new_sz//1024}KB)")
-                    w, h = new_w, new_h
-                else:
-                    if os.path.exists(tmp_out):
-                        os.remove(tmp_out)
+                    # Generate Thumbnail (target 760x520 bounding box)
+                    if not os.path.exists(thumb_path) or os.path.getsize(thumb_path) == 0:
+                        scale_th = min(760 / w, 520 / h)
+                        if scale_th < 1.0:
+                            th_w = round(w * scale_th)
+                            th_h = round(h * scale_th)
+                            thumb = im_rgb.resize((th_w, th_h), Image.Resampling.LANCZOS)
+                        else:
+                            th_w, th_h = w, h
+                            thumb = im_rgb
 
-            # Generate Thumbnail (target 760x520 bounding cover)
-            target_w = 760
-            target_h = 520
-            aspect = w / h
-            target_aspect = target_w / target_h
+                        thumb.save(thumb_path, 'WEBP', quality=80)
+                        th_sz = os.path.getsize(thumb_path)
+                        print(f"  [THUMB CREATED] {os.path.basename(thumb_path)}: {th_w}x{th_h} ({th_sz//1024}KB)")
 
-            if aspect >= target_aspect:
-                th_h = target_h
-                th_w = round(w * target_h / h)
-            else:
-                th_w = target_w
-                th_h = round(h * target_w / w)
-
-            # If the original is already smaller than the thumbnail size, don't upscale
-            if w <= th_w and h <= th_h:
-                th_w, th_h = w, h
-
-            cmd = ['cwebp', src_path, '-resize', str(th_w), str(th_h), '-q', '80', '-o', thumb_path]
-            subprocess.check_call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            th_sz = os.path.getsize(thumb_path)
-            print(f"  [THUMB CREATED] {os.path.basename(thumb_path)}: {th_w}x{th_h} ({th_sz//1024}KB)")
+            except Exception as e:
+                print(f"  Error processing {f}: {e}")
 
     print("\nOptimization complete!")
 

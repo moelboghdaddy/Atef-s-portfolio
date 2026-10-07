@@ -41,8 +41,8 @@
 
 <header class="topbar">
   <nav class="topnav topnav--left">
-    <a href="index.html#work">Work</a>
-    <a href="index.html#services">Services</a>
+    <a href="index.html#work" data-i18n="nav_work">Work</a>
+    <a href="index.html#services" data-i18n="nav_services">Services</a>
   </nav>
 
   <a class="logo" id="logo-link" href="index.html">
@@ -50,13 +50,32 @@
   </a>
 
   <nav class="topnav topnav--right">
-    <a href="index.html#about">About</a>
-    <a href="index.html#contact">Contact</a>
+    <a href="index.html#about" data-i18n="nav_about">About</a>
+    <a href="index.html#contact" data-i18n="nav_contact">Contact</a>
+    <div class="nav-actions">
+      <button id="lang-toggle" class="nav-btn nav-btn--lang" aria-label="التحويل إلى العربية">عربي</button>
+      <button id="theme-toggle" class="nav-btn nav-btn--theme" aria-label="Toggle dark mode">
+        <svg class="theme-icon theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="theme-icon theme-icon--moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
   </nav>
 </header>
 
 <section class="project-hero">
-  <a class="back-link" href="index.html#work">&larr; Back to work</a>
+  <a class="back-link" id="back-link" href="index.html#work" data-i18n="back_to_work">&larr; Back to work</a>
   <h1 id="project-title">Project</h1>
 </section>
 
@@ -65,13 +84,14 @@
 <div class="project-hero__text" id="project-hero__text">
   <div id="project-description"></div>
   <div class="project-direction-wrap" id="project-direction-wrap">
-    <h3>Direction</h3>
+    <h3 data-i18n="direction_title">Direction</h3>
     <div id="project-direction"></div>
   </div>
 </div>
 
 <nav class="project-nav" id="project-nav"></nav>
 
+<script src="js/theme-lang.js"></script>
 <script src="js/data.js"></script>
 <script src="js/project.js"></script>
 </body>
