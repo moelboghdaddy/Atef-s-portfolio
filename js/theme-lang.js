@@ -66,6 +66,7 @@
       contact_p: "Available for new projects. Get in touch and I'll get back to you within a couple of days.",
       contact_email: 'Email',
       contact_phone: '+201225277824',
+      contact_phone_label: 'Phone number : ',
       contact_ig: 'Instagram',
       contact_wa: 'WhatsApp',
       contact_be: 'Behance',
@@ -121,6 +122,7 @@
       contact_p: 'متاح للمشاريع الجديدة. تواصل معي وسأرد عليك خلال يومين.',
       contact_email: 'البريد الإلكتروني',
       contact_phone: '+201225277824',
+      contact_phone_label: 'رقم الهاتف : ',
       contact_ig: 'انستغرام',
       contact_wa: 'واتساب',
       contact_be: 'بيهانس',
@@ -242,7 +244,12 @@
     document.querySelectorAll('[data-i18n]').forEach((el) => {
       const key = el.getAttribute('data-i18n');
       if (dict[key]) {
-        el.textContent = dict[key];
+        if (el.closest('.topnav')) {
+          const words = dict[key].trim().split(/\s+/);
+          el.innerHTML = words.map((w) => `<span class="nav-word">${w}</span>`).join(' ');
+        } else {
+          el.textContent = dict[key];
+        }
       }
     });
 
