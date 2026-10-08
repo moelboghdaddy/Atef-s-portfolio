@@ -241,6 +241,20 @@
     track.appendChild(marquee);
     strip.appendChild(head);
     strip.appendChild(track);
+
+    const foot = document.createElement('div');
+    foot.className = 'project-strip__foot';
+    foot.innerHTML = `
+      <div class="project-strip__touch">
+        <span class="project-strip__touch-text" data-i18n="have_questions">Have any questions ?</span>
+        <a href="https://wa.me/201225277824" target="_blank" rel="noopener" class="project-strip__btn project-strip__touch-btn">
+          <span class="project-strip__btn-text" data-i18n="get_in_touch">Get in touch</span>
+          <span class="project-strip__btn-arrow">&rarr;</span>
+        </a>
+      </div>
+    `;
+    strip.appendChild(foot);
+
     workList.appendChild(strip);
 
     // Duration is based on the width of a single (non-doubled) set, so
@@ -309,6 +323,20 @@
       strip.querySelectorAll('.frame__title-arrow').forEach((fa) => {
         fa.textContent = isAr ? '←' : '→';
       });
+
+      // 5. Update touch prompt & button under each project strip
+      const touchPrompt = strip.querySelector('.project-strip__touch-text');
+      if (touchPrompt) {
+        touchPrompt.textContent = isAr ? 'هل لديك أي استفسار؟' : 'Have any questions ?';
+      }
+      const touchBtn = strip.querySelector('.project-strip__touch-btn .project-strip__btn-text');
+      if (touchBtn) {
+        touchBtn.textContent = isAr ? 'تواصل معي' : 'Get in touch';
+      }
+      const touchArrow = strip.querySelector('.project-strip__touch-btn .project-strip__btn-arrow');
+      if (touchArrow) {
+        touchArrow.textContent = isAr ? '←' : '→';
+      }
     });
   };
 

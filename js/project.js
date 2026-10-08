@@ -141,6 +141,20 @@
           : `<a href="index.html#work">&larr; Back to all work</a>`;
       }
     }
+
+    // Update touch prompt & button
+    const touchPrompt = document.querySelector('.project-touch-prompt');
+    if (touchPrompt) {
+      touchPrompt.textContent = isAr ? 'هل لديك أي استفسار؟' : 'Have any questions ?';
+    }
+    const touchBtn = document.querySelector('.project-touch-btn .project-strip__btn-text');
+    if (touchBtn) {
+      touchBtn.textContent = isAr ? 'تواصل معي' : 'Get in touch';
+    }
+    const touchArrow = document.querySelector('.project-touch-btn .project-strip__btn-arrow');
+    if (touchArrow) {
+      touchArrow.textContent = isAr ? '←' : '→';
+    }
   };
 
   // Initial render of text

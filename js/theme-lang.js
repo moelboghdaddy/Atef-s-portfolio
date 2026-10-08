@@ -64,9 +64,14 @@
       about_p3: "From there, my focus shifted toward what I care about most now: building brands, developing strategy, and giving businesses an identity that actually means something. Since then, I've worked with businesses across Egypt and around the world, helping them become brands worth remembering.",
       contact_h2: 'Contact',
       contact_p: "Available for new projects. Get in touch and I'll get back to you within a couple of days.",
+      contact_email: 'Email',
+      contact_phone: '+201225277824',
       contact_ig: 'Instagram',
       contact_wa: 'WhatsApp',
       contact_be: 'Behance',
+      get_in_touch: 'Get in touch',
+      have_questions: 'Have any questions ?',
+      section_my_work: 'My work',
       back_to_work: '← Back to work',
       direction_title: 'Direction',
       next_project_prefix: 'Next project: ',
@@ -114,9 +119,14 @@
       about_p3: 'ومن هناك، تحول تركيزي نحو ما أهتم به أكثر اليوم: بناء العلامات التجارية، وتطوير الاستراتيجيات، ومنح المشاريع هوية متكاملة تحمل معنى حقيقياً. منذ ذلك الحين، عملت مع شركات في مصر وحول العالم، لمساعدتها على أن تصبح علامات تجارية تستحق أن تُتذكَر.',
       contact_h2: 'تواصل معي',
       contact_p: 'متاح للمشاريع الجديدة. تواصل معي وسأرد عليك خلال يومين.',
+      contact_email: 'البريد الإلكتروني',
+      contact_phone: '+201225277824',
       contact_ig: 'انستغرام',
       contact_wa: 'واتساب',
       contact_be: 'بيهانس',
+      get_in_touch: 'تواصل معي',
+      have_questions: 'هل لديك أي استفسار؟',
+      section_my_work: 'أعمالي',
       back_to_work: 'العودة إلى الأعمال ←',
       direction_title: 'التوجيه الإبداعي',
       next_project_prefix: 'المشروع التالي: ',
@@ -140,7 +150,7 @@
       ]
     },
     era: {
-      title: 'إيرا',
+      title: 'إرَا',
       shortDesc: 'شركة استثمار عقاري وسمسرة تعمل في القاهرة الجديدة، لتضع معيارًا جديدًا بدل ما تتبع اللي موجود.',
       description: [
         'إيرا شركة استثمار عقاري وسمسرة تعمل في القاهرة الجديدة، وهي علامة جديدة بالفعل دخلت السوق لتضع معيارًا جديدًا بدل ما تتبع اللي موجود.'
@@ -207,7 +217,7 @@
       ]
     },
     'urban-oasis': {
-      title: 'أوربان أوازيس',
+      title: 'أوربان اواسِس',
       shortDesc: 'مفهوم لعلامة أسلوب حياة تجمع بين الزراعة الحضرية عالية التقنية ومنتجات الحياة المستدامة.',
       description: [
         'أوربان أوازيس مفهوم لعلامة أسلوب حياة تجمع بين الزراعة الحضرية عالية التقنية ومنتجات الحياة المستدامة.'
@@ -234,6 +244,11 @@
       if (dict[key]) {
         el.textContent = dict[key];
       }
+    });
+
+    // Update arrows in touch buttons
+    document.querySelectorAll('.hero-touch-btn .project-strip__btn-arrow, .project-touch-btn .project-strip__btn-arrow').forEach((arrow) => {
+      arrow.textContent = lang === 'ar' ? '←' : '→';
     });
 
     // Update language toggle button text and title
