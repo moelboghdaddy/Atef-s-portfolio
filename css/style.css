@@ -1281,35 +1281,43 @@ html[lang="ar"] .nav-btn--lang {
     padding: 11px 20px;
     font-size: 14.5px;
   }
-  .contact-phone {
-    margin-top: 20px;
+  .contact-direct {
+    margin-top: 36px;
+    gap: 12px 24px;
     font-size: 14.5px;
   }
 }
 
-.contact-phone {
-  margin-top: 28px;
+.contact-direct {
+  margin-top: clamp(44px, 5.5vw, 64px);
   font-size: clamp(15px, 1.3vw, 17px);
   color: var(--muted);
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  gap: clamp(16px, 3.5vw, 44px);
+}
+
+.contact-direct__item {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
 }
 
-.contact-phone__val {
+.contact-direct__val {
   color: var(--ink);
   font-weight: 500;
   letter-spacing: 0.01em;
   transition: color 0.2s var(--ease);
 }
 
-.contact-phone__val:hover {
+.contact-direct__val:hover {
   color: var(--muted);
   text-decoration: underline;
 }
 
-[data-theme="dark"] .contact-phone__val {
+[data-theme="dark"] .contact-direct__val {
   color: var(--ink);
 }
 
@@ -1669,13 +1677,6 @@ html[lang="ar"] .nav-btn--lang {
 [data-theme="dark"] .footer-img,
 [data-theme="dark"] img[src*="footer-01.png"] {
   filter: brightness(0) invert(1);
-}
-
-[data-theme="dark"] .logo img,
-[data-theme="dark"] .loading-logo,
-[data-theme="dark"] .hero-img[src*="logo.png"],
-[data-theme="dark"] .hero-img[src*="logo-dark.png"] {
-  content: url('../assets/logo-dark.png');
 }
 
 [data-theme="dark"] .hero-status {

@@ -67,6 +67,7 @@
       contact_email: 'Email',
       contact_phone: '+201225277824',
       contact_phone_label: 'Phone number : ',
+      contact_gmail_label: 'Gmail : ',
       contact_ig: 'Instagram',
       contact_wa: 'WhatsApp',
       contact_be: 'Behance',
@@ -123,6 +124,7 @@
       contact_email: 'البريد الإلكتروني',
       contact_phone: '+201225277824',
       contact_phone_label: 'رقم الهاتف : ',
+      contact_gmail_label: 'جيميل : ',
       contact_ig: 'انستغرام',
       contact_wa: 'واتساب',
       contact_be: 'بيهانس',
@@ -284,12 +286,19 @@
   }
 
   // 4. Logo updater for dark/light mode
+  const preloadedLogos = {
+    light: new Image(),
+    dark: new Image(),
+  };
+  preloadedLogos.light.src = 'assets/logo.png';
+  preloadedLogos.dark.src = 'assets/logo-dark.png';
+
   function updateLogos(theme) {
     const isDark = theme === 'dark';
     const targetSrc = isDark ? 'assets/logo-dark.png' : 'assets/logo.png';
     document.querySelectorAll('img').forEach((img) => {
       const src = img.getAttribute('src');
-      if (src && (src.includes('logo.png') || src.includes('logo-dark.png'))) {
+      if (src && (src.includes('logo.png') || src.includes('logo-dark.png')) && !src.endsWith(targetSrc)) {
         img.src = targetSrc;
       }
     });
