@@ -23,14 +23,14 @@
 }
 
 [data-theme="dark"] {
-  --bg: #0C0D10;
-  --paper: #121318;
-  --card-bg: #161820;
+  --bg: #000000;
+  --paper: #000000;
+  --card-bg: #000000;
   --ink: #F3F4F6;
   --muted: #9CA3AF;
   --subtle: #6B7280;
-  --line: rgba(243, 244, 246, 0.1);
-  --line-strong: rgba(243, 244, 246, 0.2);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.24);
   --accent: #FFFFFF;
 }
 
@@ -843,11 +843,11 @@ html[lang="ar"] .nav-btn--lang {
 }
 
 [data-theme="dark"] .project-strip__track::before {
-  background: linear-gradient(to right, var(--bg) 0%, rgba(12, 13, 16, 0.35) 40%, transparent 100%);
+  background: linear-gradient(to right, #000000 0%, rgba(0, 0, 0, 0.4) 40%, transparent 100%);
 }
 
 [data-theme="dark"] .project-strip__track::after {
-  background: linear-gradient(to left, var(--bg) 0%, rgba(12, 13, 16, 0.35) 40%, transparent 100%);
+  background: linear-gradient(to left, #000000 0%, rgba(0, 0, 0, 0.4) 40%, transparent 100%);
 }
 
 .project-strip__marquee {
@@ -1603,15 +1603,15 @@ html[lang="ar"] .nav-btn--lang {
 /* ---------- Dark Theme Specifics ---------- */
 
 [data-theme="dark"] .topbar {
-  background: #0C0D10;
+  background: #000000;
 }
 
 [data-theme="dark"] .loading-screen {
-  background: rgba(12, 13, 16, 0.92);
+  background: rgba(0, 0, 0, 0.95);
 }
 
 [data-theme="dark"] .site-footer {
-  background: #0C0D10;
+  background: #000000;
 }
 
 [data-theme="dark"] .contact-btn {
@@ -1622,7 +1622,7 @@ html[lang="ar"] .nav-btn--lang {
 
 [data-theme="dark"] .contact-btn:hover {
   background: #FFFFFF;
-  color: #0C0D10;
+  color: #000000;
   border-color: #FFFFFF;
 }
 
@@ -1634,13 +1634,13 @@ html[lang="ar"] .nav-btn--lang {
 
 [data-theme="dark"] .project-nav a:hover {
   background: #FFFFFF;
-  color: #0C0D10;
+  color: #000000;
   border-color: #FFFFFF;
 }
 
 [data-theme="dark"] .project-strip__btn:hover {
   background: #FFFFFF;
-  color: #0C0D10;
+  color: #000000;
   border-color: #FFFFFF;
 }
 
@@ -1694,16 +1694,16 @@ html[lang="ar"] .nav-btn--lang {
 
 [data-theme="dark"] .frame__img-wrap,
 [data-theme="dark"] .row .frame__img-wrap {
-  background: #171920;
+  background: #000000;
 }
 
 [data-theme="dark"] .frame__img-wrap::before,
 [data-theme="dark"] .row .frame__img-wrap::before {
   background: linear-gradient(
     90deg,
-    rgba(25, 27, 34, 0.7) 0%,
-    rgba(38, 41, 52, 0.95) 50%,
-    rgba(25, 27, 34, 0.7) 100%
+    rgba(15, 15, 15, 0.7) 0%,
+    rgba(30, 30, 30, 0.95) 50%,
+    rgba(15, 15, 15, 0.7) 100%
   );
   background-size: 200% 100%;
 }
