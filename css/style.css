@@ -228,15 +228,8 @@ img, video {
   transform-origin: left;
 }
 
-.nav-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: clamp(10px, 1.8vw, 24px);
-  flex-shrink: 0;
-}
-
 .nav-btn {
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -355,14 +348,11 @@ html[lang="ar"] .nav-btn--lang {
     display: block;
     white-space: nowrap;
   }
-  .nav-actions {
-    gap: 4px;
-    margin-left: clamp(4px, 1.2vw, 8px);
-  }
   .nav-btn {
     height: 28px;
     padding: 0 8px;
     font-size: 11px;
+    flex-shrink: 0;
   }
   html[lang="en"] .nav-btn--lang {
     font-size: 11px;
@@ -525,7 +515,14 @@ html[lang="ar"] .nav-btn--lang {
 /* ---------- Work / Carousel Section ---------- */
 
 .work {
-  padding: 0 0 clamp(48px, 8vw, 112px);
+  border-top: 1px solid var(--line);
+  padding: clamp(64px, 8vw, 104px) 0 clamp(48px, 8vw, 112px);
+}
+
+.work-header {
+  max-width: var(--max);
+  margin: 0 auto clamp(28px, 4vw, 48px);
+  padding: 0 var(--gutter);
 }
 
 .work-title {
@@ -533,9 +530,20 @@ html[lang="ar"] .nav-btn--lang {
   font-weight: 500;
   font-size: clamp(32px, 4vw, 48px);
   letter-spacing: -0.025em;
-  padding: 0 var(--gutter);
-  max-width: var(--max);
-  margin: 0 auto clamp(20px, 3vw, 36px);
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .work {
+    padding-top: clamp(40px, 8vw, 64px);
+  }
+  .work-header {
+    margin-bottom: clamp(18px, 3.5vw, 28px);
+  }
+  .work-title {
+    font-size: clamp(28px, 7vw, 36px);
+  }
 }
 
 .section-label {
